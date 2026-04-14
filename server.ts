@@ -8,6 +8,9 @@ import dns from 'node:dns';
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 
+// Force IPv4 globally for all DNS lookups
+dns.setDefaultResultOrder('ipv4first');
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
