@@ -320,7 +320,7 @@ function SleekChatApp() {
 
   return (
     <div className="flex flex-col h-screen bg-bg text-text-main font-sans overflow-hidden items-center justify-center p-4">
-      <div className="w-full max-w-[1000px] h-full max-h-[720px] bg-card border border-[#30363d] rounded-2xl flex shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
+      <div className="w-full max-w-250 h-full max-h-180 bg-card border border-bubble-them rounded-2xl flex shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden">
         
         <AnimatePresence mode="wait">
           {!roomId ? (
@@ -371,7 +371,7 @@ function SleekChatApp() {
               </div>
 
               <form onSubmit={handleJoin} className="w-full max-w-xs space-y-4">
-                <div className="bg-bg border border-[#30363d] rounded-xl px-5 py-3.5 flex items-center focus-within:border-accent/50 transition-all shadow-inner">
+                <div className="bg-bg border border-bubble-them rounded-xl px-5 py-3.5 flex items-center focus-within:border-accent/50 transition-all shadow-inner">
                   <input 
                     type="text"
                     autoFocus
@@ -405,9 +405,9 @@ function SleekChatApp() {
                     initial={{ width: 0, opacity: 0 }}
                     animate={{ width: 260, opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
-                    className="h-full bg-card border-r border-[#30363d] flex flex-col overflow-hidden"
+                    className="h-full bg-card border-r border-bubble-them flex flex-col overflow-hidden"
                   >
-                    <div className="p-6 border-b border-[#30363d]">
+                    <div className="p-6 border-b border-bubble-them">
                       <h3 className="text-xs font-bold text-text-muted uppercase tracking-widest">Users in Room</h3>
                     </div>
                     <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -426,7 +426,7 @@ function SleekChatApp() {
               {/* Main Chat Area */}
               <div className="flex-1 flex flex-col h-full min-w-0">
                 {/* Chat Header */}
-                <header className="flex items-center justify-between px-6 py-5 border-b border-[#30363d] bg-card/50 backdrop-blur-sm">
+                <header className="flex items-center justify-between px-6 py-5 border-b border-bubble-them bg-card/50 backdrop-blur-sm">
                   <div className="flex items-center gap-4">
                     <button onClick={() => setShowSidebar(!showSidebar)} className="p-2 hover:bg-white/5 rounded-lg transition-colors">
                       <Menu className="w-5 h-5 text-text-muted" />
@@ -494,7 +494,7 @@ function SleekChatApp() {
                           "px-5 py-3 rounded-2xl text-[14px] leading-relaxed shadow-sm",
                           msg.senderId === socket?.id 
                             ? "bg-bubble-me text-white rounded-br-none" 
-                            : "bg-bubble-them text-text-main rounded-bl-none border border-[#30363d]"
+                            : "bg-bubble-them text-text-main rounded-bl-none border border-bubble-them"
                         )}
                       >
                         {msg.text}
@@ -522,9 +522,9 @@ function SleekChatApp() {
                 </div>
 
                 {/* Input Area */}
-                <div className="p-6 bg-card border-t border-[#30363d]">
+                <div className="p-6 bg-card border-t border-bubble-them">
                   <form onSubmit={sendMessage} className="flex gap-4 items-center">
-                    <div className="flex-1 bg-bg border border-[#30363d] rounded-xl px-5 py-3.5 flex items-center focus-within:border-accent/50 transition-all shadow-inner">
+                    <div className="flex-1 bg-bg border border-bubble-them rounded-xl px-5 py-3.5 flex items-center focus-within:border-accent/50 transition-all shadow-inner">
                       <input 
                         type="text"
                         value={newMessage}
@@ -536,7 +536,7 @@ function SleekChatApp() {
                     <button 
                       type="submit"
                       disabled={!newMessage.trim()}
-                      className="w-[50px] h-[50px] bg-accent text-white rounded-xl flex items-center justify-center disabled:opacity-30 disabled:scale-95 transition-all active:scale-90 shadow-[0_10px_20px_rgba(63,185,80,0.2)]"
+                      className="w-12.5 h-12.5 bg-accent text-white rounded-xl flex items-center justify-center disabled:opacity-30 disabled:scale-95 transition-all active:scale-90 shadow-[0_10px_20px_rgba(63,185,80,0.2)]"
                     >
                       <Send className="w-5 h-5" />
                     </button>
