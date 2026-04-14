@@ -4,7 +4,6 @@ import { cn } from './lib/utils';
 import { 
   Send, 
   Shield, 
-  EyeOff,
   Copy,
   Check,
   LogOut,
@@ -202,7 +201,6 @@ function SleekChatApp() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [copied, setCopied] = useState(false);
-  const [isFakeMode, setIsFakeMode] = useState(false);
   const [isOtherTyping, setIsOtherTyping] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   
@@ -313,10 +311,6 @@ function SleekChatApp() {
   const exitChat = () => {
     window.location.hash = '';
   };
-
-  if (isFakeMode) {
-    return <GeminiFakeChat onExit={() => setIsFakeMode(false)} />;
-  }
 
   return (
     <div className="flex flex-col h-screen bg-bg text-text-main font-sans overflow-hidden items-center justify-center p-4">
@@ -450,13 +444,6 @@ function SleekChatApp() {
                     >
                       {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                       {copied ? "Copied" : "Copy Link"}
-                    </button>
-                    <button 
-                      onClick={() => setIsFakeMode(true)}
-                      className="p-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 transition-colors"
-                      title="Panic Exit"
-                    >
-                      <EyeOff className="w-4 h-4" />
                     </button>
                   </div>
                 </header>
