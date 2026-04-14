@@ -52,6 +52,12 @@ async function startServer() {
       auth: { user, pass },
     });
 
+    void emailTransporter.verify().then(() => {
+      console.log('SMTP transporter verified successfully.');
+    }).catch((error) => {
+      console.error('SMTP transporter verification failed:', error);
+    });
+
     return emailTransporter;
   };
 
@@ -62,15 +68,17 @@ async function startServer() {
     const transporter = getEmailTransporter();
     if (!transporter) return;
 
-    const from = process.env.SMTP_FROM || 'Gemini Alerts <no-reply@gemini.local>';
+    const from = process.env.SMTP_FROM || process.env.SMTP_USER || 'Gemini Alerts <no-reply@gemini.local>';
     const appUrl = process.env.APP_URL || `http://localhost:${PORT}`;
 
+    console.log(`Sending owner email alert for ${joinedUsername} joining ${roomId}...`);
     await transporter.sendMail({
       from,
       to: OWNER_EMAIL_TO,
       subject: 'Gemini Alert: User joined your room',
       text: `${joinedUsername} joined room ${roomId} at ${new Date().toISOString()}.\n\nOpen app: ${appUrl}`,
     });
+    console.log(`Owner email alert sent successfully to ${OWNER_EMAIL_TO}.`);
   };
 
   // Track users in rooms: { roomId: { socketId: username } }
@@ -111,6 +119,33 @@ async function startServer() {
       res.json({ text });
     } catch (error: any) {
       console.error('AI Proxy Error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/test-email', async (_req, res) => {
+    try {
+      const transporter = getEmailTransporter();
+      if (!transporter) {
+        return res.status(500).json({ error: 'SMTP transporter not configured' });
+      }
+
+      const from = process.env.SMTP_FROM || process.env.SMTP_USER || 'Gemini Alerts <no-reply@gemini.local>';
+      const to = OWNER_EMAIL_TO || process.env.SMTP_USER;
+      if (!to) {
+        return res.status(500).json({ error: 'OWNER_EMAIL_TO or SMTP_USER is required' });
+      }
+
+      await transporter.sendMail({
+        from,
+        to,
+        subject: 'Gemini SMTP Test',
+        text: 'This is a test email from Gemini.',
+      });
+
+      res.json({ ok: true });
+    } catch (error: any) {
+      console.error('Test email failed:', error);
       res.status(500).json({ error: error.message });
     }
   });
