@@ -84,6 +84,7 @@ async function startServer() {
       
       // Broadcast updated user list to the room
       io.to(roomId).emit('room-users', Object.values(roomUsers[roomId]));
+      socket.to(roomId).emit('user-joined', { username });
     });
 
     socket.on('send-message', (data) => {

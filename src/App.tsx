@@ -31,6 +31,7 @@ interface Message {
 }
 
 const FIXED_ROOM_ID = 'gemini-private-room';
+const OWNER_USERNAME = 'MoHamed';
 
 // --- Error Boundary ---
 interface ErrorBoundaryProps { children: React.ReactNode; }
@@ -207,6 +208,27 @@ function SleekChatApp() {
   
   const scrollRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isOwnerRef = useRef(false);
+  const isJoinedRef = useRef(false);
+  const usernameRef = useRef('');
+  const isOwner = username.trim().toLowerCase() === OWNER_USERNAME.toLowerCase();
+
+  const notifyOwnerUserJoined = (joinedUsername: string) => {
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+
+    new Notification('Gemini', {
+      body: `${joinedUsername} joined the room`,
+      icon: '/favicon.svg',
+      tag: `joined-${joinedUsername}-${Date.now()}`,
+    });
+  };
+
+  useEffect(() => {
+    isOwnerRef.current = isOwner;
+    isJoinedRef.current = isJoined;
+    usernameRef.current = username;
+  }, [isOwner, isJoined, username]);
 
   // Initialize Socket
   useEffect(() => {
@@ -229,10 +251,26 @@ function SleekChatApp() {
       setIsOtherTyping(false);
     });
 
+    newSocket.on('user-joined', (data: { username: string }) => {
+      if (!isJoinedRef.current || !isOwnerRef.current) return;
+      if (data.username === usernameRef.current) return;
+      notifyOwnerUserJoined(data.username);
+    });
+
     return () => {
       newSocket.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    if (!isJoined || !isOwner) return;
+    if (typeof window === 'undefined' || !('Notification' in window)) return;
+    if (Notification.permission === 'default') {
+      Notification.requestPermission().catch(() => {
+        // Ignore permission prompt errors to keep chat flow smooth.
+      });
+    }
+  }, [isJoined, isOwner]);
 
   // Always use one private room and remove old hash links from the URL.
   useEffect(() => {
