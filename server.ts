@@ -132,7 +132,6 @@ async function startServer() {
       
       // Broadcast updated user list to the room
       io.to(roomId).emit('room-users', Object.values(roomUsers[roomId]));
-      socket.to(roomId).emit('user-joined', { username });
       void sendOwnerJoinEmail(username, roomId).catch((error) => {
         console.error('Join email notification failed:', error);
       });
