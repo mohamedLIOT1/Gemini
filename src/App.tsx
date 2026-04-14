@@ -332,11 +332,11 @@ function SleekChatApp() {
               className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-8"
             >
               <div className="w-20 h-20 flex items-center justify-center">
-                <img src={geminiLogo} alt="جيميناي" className="w-full h-full object-contain" />
+                <img src={geminiLogo} alt="Gemini" className="w-full h-full object-contain" />
               </div>
               
               <div className="space-y-3">
-                <h1 className="text-3xl font-bold tracking-tight text-text-main">جيميناي</h1>
+                <h1 className="text-3xl font-bold tracking-tight text-text-main">Gemini</h1>
                 <p className="text-text-muted max-w-xs mx-auto text-sm leading-relaxed">
                   Encrypted real-time chat. No messages are stored in any database. Once the page is closed, everything disappears.
                 </p>
