@@ -27,6 +27,7 @@ async function startServer() {
   const PORT = Number(process.env.PORT) || 3000;
   const EMAIL_NOTIFICATIONS_ENABLED = process.env.EMAIL_NOTIFICATIONS_ENABLED === 'true';
   const OWNER_EMAIL_TO = process.env.OWNER_EMAIL_TO;
+  const EMAIL_SEND_TIMEOUT_MS = Number(process.env.EMAIL_SEND_TIMEOUT_MS || 20000);
 
   let emailTransporter: nodemailer.Transporter | null = null;
 
@@ -49,6 +50,9 @@ async function startServer() {
       port,
       secure,
       auth: { user, pass },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
 
     void emailTransporter.verify().then(() => {
@@ -58,6 +62,14 @@ async function startServer() {
     });
 
     return emailTransporter;
+  };
+
+  const sendMailWithTimeout = async (mailer: nodemailer.Transporter, options: nodemailer.SendMailOptions) => {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error(`Email send timed out after ${EMAIL_SEND_TIMEOUT_MS}ms`)), EMAIL_SEND_TIMEOUT_MS);
+    });
+
+    return Promise.race([mailer.sendMail(options), timeoutPromise]);
   };
 
   const sendJoinEmail = async (joinedUsername: string, roomId: string) => {
@@ -70,7 +82,7 @@ async function startServer() {
     const appUrl = process.env.APP_URL || `http://localhost:${PORT}`;
 
     console.log(`Sending owner email alert for ${joinedUsername} joining ${roomId}...`);
-    await transporter.sendMail({
+    await sendMailWithTimeout(transporter, {
       from,
       to: OWNER_EMAIL_TO,
       subject: 'Gemini Alert: User joined your room',
@@ -134,7 +146,7 @@ async function startServer() {
         return res.status(500).json({ error: 'OWNER_EMAIL_TO or SMTP_USER is required' });
       }
 
-      await transporter.sendMail({
+      await sendMailWithTimeout(transporter, {
         from,
         to,
         subject: 'Gemini SMTP Test',
@@ -161,7 +173,7 @@ async function startServer() {
         return res.status(500).json({ error: 'OWNER_EMAIL_TO or SMTP_USER is required' });
       }
 
-      await transporter.sendMail({
+      await sendMailWithTimeout(transporter, {
         from,
         to,
         subject: 'Gemini SMTP Test',
