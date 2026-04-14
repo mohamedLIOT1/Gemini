@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dns from 'node:dns';
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 
@@ -37,6 +38,7 @@ async function startServer() {
     const host = process.env.SMTP_HOST;
     const port = Number(process.env.SMTP_PORT || 587);
     const secure = process.env.SMTP_SECURE === 'true';
+    const forceIPv4 = process.env.SMTP_FORCE_IPV4 !== 'false';
     const user = process.env.SMTP_USER;
     const pass = process.env.SMTP_PASS;
 
@@ -53,6 +55,13 @@ async function startServer() {
       connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 15000,
+      ...(forceIPv4
+        ? {
+            lookup: (hostname: string, _options: any, callback: any) => {
+              dns.lookup(hostname, { family: 4, all: false }, callback);
+            },
+          }
+        : {}),
     });
 
     void emailTransporter.verify().then(() => {
