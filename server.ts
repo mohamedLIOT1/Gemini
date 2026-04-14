@@ -31,7 +31,7 @@ async function startServer() {
   const PORT = Number(process.env.PORT) || 3000;
   const EMAIL_NOTIFICATIONS_ENABLED = process.env.EMAIL_NOTIFICATIONS_ENABLED === 'true';
   const OWNER_EMAIL_TO = process.env.OWNER_EMAIL_TO;
-  const EMAIL_SEND_TIMEOUT_MS = Number(process.env.EMAIL_SEND_TIMEOUT_MS || 20000);
+  const EMAIL_SEND_TIMEOUT_MS = Number(process.env.EMAIL_SEND_TIMEOUT_MS || 10000);
 
   let emailTransporter: nodemailer.Transporter | null = null;
 
@@ -55,9 +55,10 @@ async function startServer() {
       port,
       secure,
       auth: { user, pass },
-      connectionTimeout: 10000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 10000,
+      pool: { maxConnections: 1 },
       ...(forceIPv4
         ? {
             lookup: (hostname: string, _options: any, callback: any) => {
