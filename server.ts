@@ -5,6 +5,7 @@ import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import nodemailer from 'nodemailer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +25,53 @@ async function startServer() {
   });
 
   const PORT = Number(process.env.PORT) || 3000;
+  const OWNER_USERNAME = (process.env.OWNER_USERNAME || 'MoHamed').toLowerCase();
+  const EMAIL_NOTIFICATIONS_ENABLED = process.env.EMAIL_NOTIFICATIONS_ENABLED === 'true';
+  const OWNER_EMAIL_TO = process.env.OWNER_EMAIL_TO;
+
+  let emailTransporter: nodemailer.Transporter | null = null;
+
+  const getEmailTransporter = () => {
+    if (emailTransporter) return emailTransporter;
+
+    const host = process.env.SMTP_HOST;
+    const port = Number(process.env.SMTP_PORT || 587);
+    const secure = process.env.SMTP_SECURE === 'true';
+    const user = process.env.SMTP_USER;
+    const pass = process.env.SMTP_PASS;
+
+    if (!host || !user || !pass) {
+      console.warn('Email notifications are enabled, but SMTP credentials are incomplete.');
+      return null;
+    }
+
+    emailTransporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: { user, pass },
+    });
+
+    return emailTransporter;
+  };
+
+  const sendOwnerJoinEmail = async (joinedUsername: string, roomId: string) => {
+    if (!EMAIL_NOTIFICATIONS_ENABLED || !OWNER_EMAIL_TO) return;
+    if (joinedUsername.trim().toLowerCase() === OWNER_USERNAME) return;
+
+    const transporter = getEmailTransporter();
+    if (!transporter) return;
+
+    const from = process.env.SMTP_FROM || 'Gemini Alerts <no-reply@gemini.local>';
+    const appUrl = process.env.APP_URL || `http://localhost:${PORT}`;
+
+    await transporter.sendMail({
+      from,
+      to: OWNER_EMAIL_TO,
+      subject: 'Gemini Alert: User joined your room',
+      text: `${joinedUsername} joined room ${roomId} at ${new Date().toISOString()}.\n\nOpen app: ${appUrl}`,
+    });
+  };
 
   // Track users in rooms: { roomId: { socketId: username } }
   const roomUsers: Record<string, Record<string, string>> = {};
@@ -85,6 +133,9 @@ async function startServer() {
       // Broadcast updated user list to the room
       io.to(roomId).emit('room-users', Object.values(roomUsers[roomId]));
       socket.to(roomId).emit('user-joined', { username });
+      void sendOwnerJoinEmail(username, roomId).catch((error) => {
+        console.error('Join email notification failed:', error);
+      });
     });
 
     socket.on('send-message', (data) => {

@@ -16,5 +16,6 @@ View your app in AI Studio: https://ai.studio/apps/32893c9b-f3ae-4e53-ae1a-98abd
 1. Install dependencies:
    `npm install`
 2. Set `OPENROUTER_API_KEY` and `OPENROUTER_MODEL` in `.env.local`
+   - Optional owner email alerts: set `EMAIL_NOTIFICATIONS_ENABLED=true` and SMTP vars from `.env.example`
 3. Run the app:
    `npm run dev`
