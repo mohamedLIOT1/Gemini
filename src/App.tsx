@@ -31,6 +31,8 @@ interface Message {
   isAI?: boolean;
 }
 
+const FIXED_ROOM_ID = 'gemini-private-room';
+
 // --- Error Boundary ---
 interface ErrorBoundaryProps { children: React.ReactNode; }
 interface ErrorBoundaryState { hasError: boolean; error: any; }
@@ -194,7 +196,7 @@ function GeminiFakeChat({ onExit }: { onExit: () => void }) {
 // --- Main App Component ---
 function SleekChatApp() {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [roomId, setRoomId] = useState<string | null>(null);
+  const [roomId, setRoomId] = useState<string>(FIXED_ROOM_ID);
   const [username, setUsername] = useState('');
   const [isJoined, setIsJoined] = useState(false);
   const [roomUsers, setRoomUsers] = useState<string[]>([]);
@@ -233,26 +235,13 @@ function SleekChatApp() {
     };
   }, []);
 
-  // Handle URL Hash for Room ID
+  // Always use one private room and remove old hash links from the URL.
   useEffect(() => {
-    const hash = window.location.hash.replace('#', '');
-    if (hash) {
-      setRoomId(hash);
+    if (window.location.hash) {
+      const cleanUrl = `${window.location.pathname}${window.location.search}`;
+      window.history.replaceState(null, '', cleanUrl);
     }
-
-    const handleHashChange = () => {
-      const newHash = window.location.hash.replace('#', '');
-      if (newHash) {
-        setRoomId(newHash);
-      } else {
-        setRoomId(null);
-        setIsJoined(false);
-        setMessages([]);
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    setRoomId(FIXED_ROOM_ID);
   }, []);
 
   // Join Room when both roomId and username are ready
@@ -303,13 +292,10 @@ function SleekChatApp() {
   };
 
   const copyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    const cleanUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+    navigator.clipboard.writeText(cleanUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const exitChat = () => {
-    window.location.hash = '';
   };
 
   return (
