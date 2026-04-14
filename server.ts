@@ -25,7 +25,6 @@ async function startServer() {
   });
 
   const PORT = Number(process.env.PORT) || 3000;
-  const OWNER_USERNAME = (process.env.OWNER_USERNAME || 'MoHamed').toLowerCase();
   const EMAIL_NOTIFICATIONS_ENABLED = process.env.EMAIL_NOTIFICATIONS_ENABLED === 'true';
   const OWNER_EMAIL_TO = process.env.OWNER_EMAIL_TO;
 
@@ -61,9 +60,8 @@ async function startServer() {
     return emailTransporter;
   };
 
-  const sendOwnerJoinEmail = async (joinedUsername: string, roomId: string) => {
+  const sendJoinEmail = async (joinedUsername: string, roomId: string) => {
     if (!EMAIL_NOTIFICATIONS_ENABLED || !OWNER_EMAIL_TO) return;
-    if (joinedUsername.trim().toLowerCase() === OWNER_USERNAME) return;
 
     const transporter = getEmailTransporter();
     if (!transporter) return;
@@ -150,6 +148,33 @@ async function startServer() {
     }
   });
 
+  app.get('/api/test-email', async (_req, res) => {
+    try {
+      const transporter = getEmailTransporter();
+      if (!transporter) {
+        return res.status(500).json({ error: 'SMTP transporter not configured' });
+      }
+
+      const from = process.env.SMTP_FROM || process.env.SMTP_USER || 'Gemini Alerts <no-reply@gemini.local>';
+      const to = OWNER_EMAIL_TO || process.env.SMTP_USER;
+      if (!to) {
+        return res.status(500).json({ error: 'OWNER_EMAIL_TO or SMTP_USER is required' });
+      }
+
+      await transporter.sendMail({
+        from,
+        to,
+        subject: 'Gemini SMTP Test',
+        text: 'This is a test email from Gemini.',
+      });
+
+      res.json({ ok: true });
+    } catch (error: any) {
+      console.error('Test email failed:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Socket.io Logic
   io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
@@ -167,7 +192,7 @@ async function startServer() {
       
       // Broadcast updated user list to the room
       io.to(roomId).emit('room-users', Object.values(roomUsers[roomId]));
-      void sendOwnerJoinEmail(username, roomId).catch((error) => {
+      void sendJoinEmail(username, roomId).catch((error) => {
         console.error('Join email notification failed:', error);
       });
     });
