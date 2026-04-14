@@ -1,0 +1,12 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="geminiGradient" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(128 128) rotate(135) scale(170)">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="0.35" stop-color="#60A5FA"/>
+      <stop offset="0.55" stop-color="#34D399"/>
+      <stop offset="0.78" stop-color="#FACC15"/>
+      <stop offset="1" stop-color="#F43F5E"/>
+    </radialGradient>
+  </defs>
+  <path d="M128 8C136 48 170 82 248 128C170 174 136 208 128 248C120 208 86 174 8 128C86 82 120 48 128 8Z" fill="url(#geminiGradient)"/>
+</svg>

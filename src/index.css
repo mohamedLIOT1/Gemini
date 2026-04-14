@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0b0e14;
+  --color-card: #161b22;
+  --color-accent: #3fb950;
+  --color-text-main: #e6edf3;
+  --color-text-muted: #8b949e;
+  --color-bubble-me: #238636;
+  --color-bubble-them: #30363d;
+  --font-sans: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-text-main font-sans;
+  }
+}
